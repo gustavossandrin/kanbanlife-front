@@ -24,7 +24,7 @@ api.interceptors.response.use(
   async (error) => {
     if (error.response?.status === 401) {
       localStorage.removeItem('@KanbanLife:token')
-      window.location.href = '/auth/login'
+      window.location.href = '/login'
     }
 
     return Promise.reject(error)

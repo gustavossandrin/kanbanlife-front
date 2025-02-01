@@ -25,12 +25,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const token = localStorage.getItem('@KanbanLife:token')
+    const publicPaths = ['/login', '/register', '/about']
+    const authOnlyPaths = ['/login', '/register']
 
-    if (!token && !pathname?.startsWith('/auth')) {
-      router.push('/auth/login')
+    if (!token && !publicPaths.includes(pathname || '')) {
+      router.push('/login')
     }
 
-    if (token && pathname?.startsWith('/auth')) {
+    if (token && authOnlyPaths.includes(pathname || '')) {
       router.push('/projects')
     }
   }, [pathname, router])
