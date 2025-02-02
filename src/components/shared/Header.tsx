@@ -21,7 +21,7 @@ const Header = () => {
           <ul className="flex space-x-6 items-center">
             <li>
               <Link 
-                href="https://linkedin.com" 
+                href="https://www.linkedin.com/in/gustavo-sandrin-848044241/"
                 target="_blank"
                 className="text-gray-700 hover:text-purple-600 transition-colors"
               >
@@ -30,7 +30,16 @@ const Header = () => {
             </li>
             <li>
               <Link 
-                href="/about"
+                href="https://github.com/gustavossandrin"
+                target="_blank"
+                className="text-gray-700 hover:text-purple-600 transition-colors"
+              >
+                GitHub
+              </Link>
+            </li>
+            <li>
+              <Link 
+                href="/"
                 className="text-gray-700 hover:text-purple-600 transition-colors"
               >
                 About

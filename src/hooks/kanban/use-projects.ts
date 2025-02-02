@@ -2,20 +2,31 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { api } from '@/services/api/client'
-import { Project } from '@/domain/types/kanban'
 
 interface CreateProjectData {
   name: string
 }
 
+export interface Project {
+  name: string
+  userId: string
+  id: string
+  createdAt: string
+  updatedAt: string
+}
+
 export function useProjects() {
   const queryClient = useQueryClient()
 
-  const { data: projects = [], isLoading } = useQuery<Project[]>({
+  const query = useQuery<Project[]>({
     queryKey: ['projects'],
     queryFn: async () => {
-      const response = await api.get('/projects')
-      return response.data
+      try {
+        const response = await api.get('/projects')
+        return response.data
+      } catch (error) {
+        throw new Error('Failed to fetch projects')
+      }
     },
   })
 
@@ -39,8 +50,9 @@ export function useProjects() {
   })
 
   return {
-    projects,
-    isLoading,
+    projects: query.data ?? [],
+    isLoading: query.isLoading,
+    error: query.error,
     createProject: createProject.mutate,
     deleteProject: deleteProject.mutate,
   }

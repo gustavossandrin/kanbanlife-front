@@ -7,6 +7,7 @@ export const api = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+  withCredentials: true,
 })
 
 api.interceptors.request.use(async (config) => {
@@ -21,12 +22,10 @@ api.interceptors.request.use(async (config) => {
 
 api.interceptors.response.use(
   (response) => response,
-  async (error) => {
+  (error) => {
     if (error.response?.status === 401) {
-      localStorage.removeItem('@KanbanLife:token')
       window.location.href = '/login'
     }
-
     return Promise.reject(error)
   }
 ) 

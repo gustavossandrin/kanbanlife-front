@@ -4,6 +4,8 @@ import { useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { api } from '@/services/api/client'
 import { User } from '@/domain/types/kanban'
+import { toast } from 'react-hot-toast'
+import { AxiosError } from 'axios'
 
 interface SignInCredentials {
   email: string
@@ -16,50 +18,81 @@ interface SignUpData extends SignInCredentials {
 }
 
 interface AuthState {
-  token: string
   user: User
 }
 
+interface ApiError {
+  message: string
+  fields?: Record<string, string>
+}
+
 export function useAuth() {
-  const [data, setData] = useState<AuthState | null>(null)
   const router = useRouter()
 
   const signIn = useCallback(async ({ email, password }: SignInCredentials) => {
-    const response = await api.post<AuthState>('/auth/login', {
-      email,
-      password,
-    })
+    try {
+      const response = await api.post('/auth/login', {
+        email,
+        password,
+      })
 
-    const { token, user } = response.data
+      const { token } = response.data
+      localStorage.setItem('@KanbanLife:token', token)
 
-    localStorage.setItem('@KanbanLife:token', token)
-    setData({ token, user })
-
-    router.push('/projects')
+      router.push('/projects')
+    } catch (error) {
+      if (error instanceof AxiosError) {
+        const apiError = error.response?.data as ApiError
+        toast.error(apiError.message || 'Failed to sign in')
+      }
+      throw error
+    }
   }, [router])
 
   const signUp = useCallback(
     async ({ email, password, firstName, lastName }: SignUpData) => {
-      await api.post('/auth/register', {
-        email,
-        password,
-        firstName,
-        lastName,
-      })
+      try {
+        await api.post('/auth/register', {
+          email,
+          password,
+          firstName,
+          lastName,
+        })
 
-      await signIn({ email, password })
+        router.push('/login')
+        toast.success('Account created successfully! Please sign in.')
+      } catch (error) {
+        if (error instanceof AxiosError) {
+          const apiError = error.response?.data as ApiError
+
+          if (error.response?.status === 409) {
+            toast.error(apiError.message)
+          } else if (error.response?.status === 422 && apiError.fields) {
+            const fieldErrors = Object.values(apiError.fields).join(', ')
+            toast.error(`Validation error: ${fieldErrors}`)
+          } else {
+            toast.error('An error occurred while creating your account. Please try again.')
+          }
+        }
+        throw error
+      }
     },
-    [signIn]
+    [router]
   )
 
-  const signOut = useCallback(() => {
-    localStorage.removeItem('@KanbanLife:token')
-    setData(null)
-    router.push('/login')
+  const signOut = useCallback(async () => {
+    try {
+      await api.post('/auth/logout')
+      localStorage.removeItem('@KanbanLife:token')
+      router.push('/login')
+    } catch (error) {
+      console.error('Error signing out:', error)
+      localStorage.removeItem('@KanbanLife:token')
+      router.push('/login')
+    }
   }, [router])
 
   return {
-    user: data?.user,
     signIn,
     signUp,
     signOut,

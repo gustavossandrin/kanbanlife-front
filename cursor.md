@@ -123,3 +123,11 @@ O projeto segue princípios da Clean Architecture, separando claramente as camad
 5. **Drag and Drop**
    - @dnd-kit/core
    - @dnd-kit/sortable
+
+## Colors
+
+The main colors used in the project are:
+
+- White (#FFFFFF) - Primary background color
+- Black (#000000) - Headers and text
+- Purple (#6B46C1) - Primary accent color and interactive elements
