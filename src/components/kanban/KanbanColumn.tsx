@@ -1,64 +1,98 @@
-import React from 'react'
-import { useSortable } from '@dnd-kit/sortable'
-import { CSS } from '@dnd-kit/utilities'
-import { Column, Task } from '@/domain/types/kanban'
-import { KanbanTask } from './KanbanTask'
-import { SortableContext } from '@dnd-kit/sortable'
+'use client'
 
-interface KanbanColumnProps {
-  column: Column
+import { Draggable } from '@hello-pangea/dnd'
+import { cn } from '@/lib/utils'
+import { TaskColor } from '@/services/api/board'
+import { Task } from '@/domain/types/kanban'
+import { useState } from 'react'
+import { EditTaskModal } from './EditTaskModal'
+
+interface Props {
+  name: string
+  maxTasks: number
   tasks: Task[]
+  onTaskUpdated: () => void
 }
 
-export function KanbanColumn({ column, tasks }: KanbanColumnProps) {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({
-    id: column.id,
-    data: {
-      type: 'Column',
-      column,
-    },
-  })
+const colorStyles = {
+  [TaskColor.YELLOW]: { bg: 'bg-yellow-100', border: 'border-yellow-300' },
+  [TaskColor.GREEN]: { bg: 'bg-green-100', border: 'border-green-300' },
+  [TaskColor.BLUE]: { bg: 'bg-blue-100', border: 'border-blue-300' },
+  [TaskColor.RED]: { bg: 'bg-red-100', border: 'border-red-300' },
+  [TaskColor.CYAN]: { bg: 'bg-cyan-100', border: 'border-cyan-300' },
+  [TaskColor.PURPLE]: { bg: 'bg-purple-100', border: 'border-purple-300' },
+  [TaskColor.ORANGE]: { bg: 'bg-orange-100', border: 'border-orange-300' },
+  [TaskColor.MAGENTA]: { bg: 'bg-pink-100', border: 'border-pink-300' },
+}
 
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
+export function KanbanColumn({ tasks, onTaskUpdated }: Props) {
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null)
+
+  const handleEditTask = (task: Task) => {
+    setSelectedTask(task)
+  }
+
+  const handleCloseEditTask = () => {
+    setSelectedTask(null)
+  }
+
+  const handleTaskEdited = () => {
+    onTaskUpdated()
+    handleCloseEditTask()
   }
 
   return (
-    <div
-      ref={setNodeRef}
-      style={style}
-      className={`flex h-full min-h-[500px] w-[350px] flex-col rounded-lg bg-gray-100 p-4 ${
-        isDragging ? 'opacity-50' : ''
-      }`}
-    >
-      <div
-        {...attributes}
-        {...listeners}
-        className="flex items-center justify-between rounded-md bg-white p-3 font-medium shadow-sm"
-      >
-        <h3>{column.name}</h3>
-        <span className="rounded-full bg-gray-200 px-2 py-1 text-sm">
-          {tasks.length}/{column.maxTasks || '∞'}
-        </span>
+    <>
+      <div className="space-y-3">
+        {tasks.map((task, index) => (
+          <Draggable key={task.id} draggableId={task.id} index={index}>
+            {(provided, snapshot) => (
+              <div
+                ref={provided.innerRef}
+                {...provided.draggableProps}
+                {...provided.dragHandleProps}
+                className={cn(
+                  "relative",
+                  snapshot.isDragging && "z-50"
+                )}
+                onClick={() => handleEditTask(task)}
+              >
+                <div
+                  className={cn(
+                    "border-2 p-3 hover:bg-opacity-90 transition-colors rounded-lg text-gray-700 cursor-pointer",
+                    colorStyles[task.color]?.bg,
+                    colorStyles[task.color]?.border,
+                    snapshot.isDragging && "shadow-xl"
+                  )}
+                >
+                  <h4 className="font-medium">{task.title}</h4>
+                  {task.labels.length > 0 && (
+                    <div className="mt-2 flex flex-wrap gap-1">
+                      {task.labels.map((label) => (
+                        <span
+                          key={label.id}
+                          className="rounded-full bg-white/50 px-2 py-1 text-xs font-medium"
+                        >
+                          {label.title}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </Draggable>
+        ))}
       </div>
 
-      <div className="mt-4 flex flex-1 flex-col gap-2 overflow-y-auto">
-        <SortableContext items={tasks.map((task) => task.id)}>
-          {tasks
-            .sort((a, b) => a.position - b.position)
-            .map((task) => (
-              <KanbanTask key={task.id} task={task} />
-            ))}
-        </SortableContext>
-      </div>
-    </div>
+      {selectedTask && (
+        <EditTaskModal
+          isOpen={true}
+          onClose={handleCloseEditTask}
+          task={selectedTask}
+          onSuccess={handleTaskEdited}
+        />
+      )}
+    </>
   )
 } 

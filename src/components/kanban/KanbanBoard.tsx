@@ -1,91 +1,219 @@
 'use client'
 
-import React from 'react'
-import { DndContext, DragEndEvent, DragOverEvent } from '@dnd-kit/core'
-import { SortableContext } from '@dnd-kit/sortable'
-import { useBoardStore } from '@/stores/kanban/board-store'
-import { Column, Task } from '@/domain/types/kanban'
+import { DragDropContext, Droppable, DropResult } from '@hello-pangea/dnd'
 import { KanbanColumn } from './KanbanColumn'
+import { useBoard } from '@/hooks/kanban/use-board'
+import { toast } from 'sonner'
+import { Plus } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { CreateTaskModal } from './CreateTaskModal'
+import { Project, Column } from '@/domain/types/kanban'
+import { cn } from '@/lib/utils'
 
-export function KanbanBoard() {
-  const { columns, tasks, moveTask, moveColumn } = useBoardStore()
+interface Props {
+  boardId: string
+}
 
-  const handleDragOver = (event: DragOverEvent) => {
-    const { active, over } = event
-    if (!over) return
+export function KanbanBoard({ boardId }: Props) {
+  const { board, updateTaskPosition, updateBoard, fetchBoard } = useBoard()
+  const [selectedColumnId, setSelectedColumnId] = useState<string | null>(null)
 
-    const activeId = active.id
-    const overId = over.id
+  useEffect(() => {
+    fetchBoard(boardId)
+  }, [boardId, fetchBoard])
 
-    if (activeId === overId) return
+  if (!board) return null
 
-    const isActiveATask = active.data.current?.type === 'Task'
-    const isOverATask = over.data.current?.type === 'Task'
-
-    if (isActiveATask && isOverATask) {
-      const activeIndex = tasks.findIndex((t: Task) => t.id === activeId)
-      const overIndex = tasks.findIndex((t: Task) => t.id === overId)
-
-      if (tasks[activeIndex].columnId !== tasks[overIndex].columnId) {
-        moveTask(
-          String(activeId),
-          tasks[activeIndex].columnId,
-          tasks[overIndex].columnId,
-          overIndex
-        )
-      }
-    }
-
-    const isOverAColumn = over.data.current?.type === 'Column'
-
-    if (isActiveATask && isOverAColumn) {
-      const activeIndex = tasks.findIndex((t: Task) => t.id === activeId)
-
-      moveTask(
-        String(activeId),
-        tasks[activeIndex].columnId,
-        String(overId),
-        tasks.filter((t: Task) => t.columnId === String(overId)).length
-      )
-    }
+  const handleOpenCreateTask = (columnId: string) => {
+    setSelectedColumnId(columnId)
   }
 
-  const handleDragEnd = (event: DragEndEvent) => {
-    const { active, over } = event
-    if (!over) return
+  const handleCloseCreateTask = () => {
+    setSelectedColumnId(null)
+  }
 
-    const activeId = active.id
-    const overId = over.id
+  const handleTaskCreated = () => {
+    fetchBoard(boardId)
+  }
 
-    if (activeId === overId) return
+  const onDragEnd = async (result: DropResult) => {
+    const { destination, source, draggableId } = result
 
-    const isActiveAColumn = active.data.current?.type === 'Column'
+    if (!destination) return
 
-    if (isActiveAColumn) {
-      const overIndex = columns.findIndex((col: Column) => col.id === overId)
-
-      moveColumn(String(activeId), overIndex)
+    if (
+      destination.droppableId === source.droppableId &&
+      destination.index === source.index
+    ) {
+      return
     }
+
+    const sourceColumn = board.columns.find(
+      (col: Column) => col.id === source.droppableId
+    )
+    const destinationColumn = board.columns.find(
+      (col: Column) => col.id === destination.droppableId
+    )
+
+    if (!sourceColumn || !destinationColumn) return
+
+    // Moving to another column
+    if (
+      destinationColumn.maxTasks > 0 &&
+      destinationColumn.tasks.length >= destinationColumn.maxTasks
+    ) {
+      toast.error(`Column ${destinationColumn.name} is full`)
+      return
+    }
+
+    // Get the task being moved
+    const taskToMove = sourceColumn.tasks[source.index]
+
+    // Check if trying to drop on another task
+    const destinationTask = destinationColumn.tasks[destination.index]
+    if (destinationTask && destinationTask.id !== taskToMove.id) {
+      return
+    }
+
+    // Create new columns state
+    const newColumns = board.columns.map((col: Column) => {
+      // Remove from source column
+      if (col.id === source.droppableId) {
+        const newTasks = col.tasks.filter(task => task.id !== taskToMove.id)
+        return { ...col, tasks: newTasks }
+      }
+      
+      // Add to destination column
+      if (col.id === destination.droppableId) {
+        const newTasks = [...col.tasks]
+        
+        // Calculate new position
+        const destinationTasks = [...col.tasks]
+        const topTask = destination.index > 0 ? destinationTasks[destination.index - 1] : null
+        const bottomTask = destination.index < destinationTasks.length 
+          ? destinationTasks[destination.index] 
+          : null
+
+        const newPosition = calculateNewPosition(
+          topTask?.position ?? null,
+          bottomTask?.position ?? null
+        )
+        
+        // Insert at the new position
+        newTasks.splice(destination.index, 0, {
+          ...taskToMove,
+          columnId: destination.droppableId,
+          position: newPosition
+        })
+        
+        return { ...col, tasks: newTasks }
+      }
+      
+      return col
+    })
+
+    // Update UI immediately
+    updateBoard({
+      ...board,
+      columns: newColumns,
+    })
+
+    // Find the destination column in the new state
+    const updatedDestinationColumn = newColumns.find(col => col.id === destination.droppableId)
+    if (!updatedDestinationColumn) return
+
+    // Get the tasks around the moved task for position calculation
+    const movedTaskIndex = updatedDestinationColumn.tasks.findIndex(task => task.id === taskToMove.id)
+    if (movedTaskIndex === -1) return
+
+    const topTask = movedTaskIndex > 0 
+      ? updatedDestinationColumn.tasks[movedTaskIndex - 1] 
+      : null
+    const bottomTask = movedTaskIndex < updatedDestinationColumn.tasks.length - 1 
+      ? updatedDestinationColumn.tasks[movedTaskIndex + 1] 
+      : null
+
+    // Fire and forget request to server
+    updateTaskPosition({
+      taskId: draggableId,
+      columnId: destination.droppableId,
+      topPosition: topTask?.position ?? null,
+      bottomPosition: bottomTask?.position ?? null,
+    }).catch(() => {
+      console.error('Failed to update task position on server')
+    })
   }
 
   return (
-    <DndContext
-      onDragOver={handleDragOver}
-      onDragEnd={handleDragEnd}
-    >
-      <div className="flex h-full w-full gap-4 overflow-x-auto p-4">
-        <SortableContext items={columns.map((col: Column) => col.id)}>
-          {columns
-            .sort((a: Column, b: Column) => a.position - b.position)
-            .map((column: Column) => (
-              <KanbanColumn
-                key={column.id}
-                column={column}
-                tasks={tasks.filter((task: Task) => task.columnId === column.id)}
-              />
-            ))}
-        </SortableContext>
-      </div>
-    </DndContext>
+    <>
+      <DragDropContext onDragEnd={onDragEnd}>
+        <div className="grid h-[calc(100vh-8rem)] auto-cols-fr grid-flow-col border border-gray-200">
+          {board.columns.map((column: Column, index: number) => (
+            <div
+              key={column.id}
+              className={`flex flex-col ${
+                index !== board.columns.length - 1 ? 'border-r border-gray-200' : ''
+              }`}
+            >
+              <div className="flex items-center justify-between border-b border-gray-200 bg-gray-50 p-3">
+                <div className="flex items-center gap-2">
+                  <h3 className="font-medium">{column.name}</h3>
+                  {column.maxTasks > 0 && (
+                    <span className="rounded-full bg-gray-200 px-2 py-1 text-xs">
+                      {column.tasks.length}/{column.maxTasks}
+                    </span>
+                  )}
+                </div>
+                <button
+                  onClick={() => handleOpenCreateTask(column.id)}
+                  className="rounded p-1 hover:bg-gray-200"
+                >
+                  <Plus className="h-5 w-5 text-gray-500" />
+                </button>
+              </div>
+              <Droppable droppableId={column.id}>
+                {(provided, snapshot) => (
+                  <div
+                    ref={provided.innerRef}
+                    {...provided.droppableProps}
+                    className={cn(
+                      "flex-1 overflow-y-auto bg-white p-2",
+                      snapshot.isDraggingOver && "bg-gray-50"
+                    )}
+                  >
+                    <div className="min-h-full">
+                      <KanbanColumn
+                        name={column.name}
+                        maxTasks={column.maxTasks}
+                        tasks={column.tasks}
+                        onTaskUpdated={() => fetchBoard(boardId)}
+                      />
+                      <div className="h-2">{provided.placeholder}</div>
+                    </div>
+                  </div>
+                )}
+              </Droppable>
+            </div>
+          ))}
+        </div>
+      </DragDropContext>
+
+      {selectedColumnId && (
+        <CreateTaskModal
+          isOpen={true}
+          onClose={handleCloseCreateTask}
+          columnId={selectedColumnId}
+          onSuccess={handleTaskCreated}
+        />
+      )}
+    </>
   )
+}
+
+// Helper function to calculate new position
+function calculateNewPosition(topPosition: number | null, bottomPosition: number | null): number {
+  if (!topPosition && !bottomPosition) return 1000 // First task in empty column
+  if (!topPosition) return bottomPosition! - 1000 // Task moved to top
+  if (!bottomPosition) return topPosition + 1000 // Task moved to bottom
+  return topPosition + ((bottomPosition - topPosition) / 2) // Task moved between two tasks
 } 
