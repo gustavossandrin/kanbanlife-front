@@ -8,42 +8,37 @@ interface BoardState {
   setCurrentProject: (project: Project) => void
   setColumns: (columns: Column[]) => void
   setTasks: (tasks: Task[]) => void
-  moveTask: (taskId: string, sourceColumnId: string, targetColumnId: string, newPosition: number) => void
+  moveTask: (
+    taskId: string,
+    sourceColumnId: string,
+    targetColumnId: string,
+    newPosition: number
+  ) => void
   moveColumn: (columnId: string, newPosition: number) => void
 }
 
-type SetState = (
-  partial: BoardState | Partial<BoardState> | ((state: BoardState) => BoardState | Partial<BoardState>),
-  replace?: boolean
-) => void
-
-export const useBoardStore = create<BoardState>((set: SetState) => ({
+export const useBoardStore = create<BoardState>((set) => ({
   currentProject: null,
   columns: [],
   tasks: [],
 
   setCurrentProject: (project: Project) => set({ currentProject: project }),
+  
   setColumns: (columns: Column[]) => set({ columns }),
+  
   setTasks: (tasks: Task[]) => set({ tasks }),
 
   moveTask: (taskId: string, sourceColumnId: string, targetColumnId: string, newPosition: number) =>
-    set((state: BoardState) => {
-      const task = state.tasks.find((t: Task) => t.id === taskId)
+    set((state) => {
+      const task = state.tasks.find((t) => t.id === taskId)
       if (!task) return state
 
-      const updatedTasks = state.tasks.map((t: Task) => {
+      const updatedTasks = state.tasks.map((t) => {
         if (t.id === taskId) {
-          return {
-            ...t,
-            columnId: targetColumnId,
-            position: newPosition,
-          }
+          return { ...t, columnId: targetColumnId, position: newPosition }
         }
         if (t.columnId === targetColumnId && t.position >= newPosition) {
-          return {
-            ...t,
-            position: t.position + 1,
-          }
+          return { ...t, position: t.position + 1 }
         }
         return t
       })
@@ -52,15 +47,12 @@ export const useBoardStore = create<BoardState>((set: SetState) => ({
     }),
 
   moveColumn: (columnId: string, newPosition: number) =>
-    set((state: BoardState) => {
-      const updatedColumns = state.columns.map((column: Column) => {
-        if (column.id === columnId) {
-          return { ...column, position: newPosition }
+    set((state) => {
+      const updatedColumns = state.columns.map((col) => {
+        if (col.id === columnId) {
+          return { ...col, position: newPosition }
         }
-        if (column.position >= newPosition) {
-          return { ...column, position: column.position + 1 }
-        }
-        return column
+        return col
       })
 
       return { columns: updatedColumns }

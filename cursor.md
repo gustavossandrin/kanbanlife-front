@@ -131,3 +131,6 @@ The main colors used in the project are:
 - White (#FFFFFF) - Primary background color
 - Black (#000000) - Headers and text
 - Purple (#6B46C1) - Primary accent color and interactive elements
+
+
+Depois das alterações rode yarn build para ver se quebrou algo

@@ -6,11 +6,9 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { useRouter } from 'next/navigation'
 import { useAuth } from '@/hooks/auth/use-auth'
 
 export function SmallHeader() {
-  const router = useRouter()
   const { signOut } = useAuth()
 
   const handleLogout = async () => {

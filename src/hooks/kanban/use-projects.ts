@@ -7,12 +7,20 @@ interface CreateProjectData {
   name: string
 }
 
+interface Column {
+  id: string;
+  name: string;
+  maxTasks: number | null;
+  position: number;
+}
+
 export interface Project {
-  name: string
-  userId: string
-  id: string
-  createdAt: string
-  updatedAt: string
+  name: string;
+  userId: string;
+  id: string;
+  createdAt: string;
+  updatedAt: string;
+  columns: Column[];
 }
 
 export function useProjects() {
@@ -24,7 +32,7 @@ export function useProjects() {
       try {
         const response = await api.get('/projects')
         return response.data
-      } catch (error) {
+      } catch {
         throw new Error('Failed to fetch projects')
       }
     },

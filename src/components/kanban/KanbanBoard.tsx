@@ -1,19 +1,14 @@
 'use client'
 
 import React from 'react'
-import { DndContext, DragEndEvent, DragOverEvent, DragStartEvent } from '@dnd-kit/core'
-import { SortableContext, arrayMove } from '@dnd-kit/sortable'
+import { DndContext, DragEndEvent, DragOverEvent } from '@dnd-kit/core'
+import { SortableContext } from '@dnd-kit/sortable'
 import { useBoardStore } from '@/stores/kanban/board-store'
 import { Column, Task } from '@/domain/types/kanban'
 import { KanbanColumn } from './KanbanColumn'
 
 export function KanbanBoard() {
   const { columns, tasks, moveTask, moveColumn } = useBoardStore()
-
-  const handleDragStart = (event: DragStartEvent) => {
-    const { active } = event
-    const { id } = active
-  }
 
   const handleDragOver = (event: DragOverEvent) => {
     const { active, over } = event
@@ -67,7 +62,6 @@ export function KanbanBoard() {
     const isActiveAColumn = active.data.current?.type === 'Column'
 
     if (isActiveAColumn) {
-      const activeIndex = columns.findIndex((col: Column) => col.id === activeId)
       const overIndex = columns.findIndex((col: Column) => col.id === overId)
 
       moveColumn(String(activeId), overIndex)
@@ -76,7 +70,6 @@ export function KanbanBoard() {
 
   return (
     <DndContext
-      onDragStart={handleDragStart}
       onDragOver={handleDragOver}
       onDragEnd={handleDragEnd}
     >

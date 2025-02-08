@@ -1,11 +1,10 @@
 'use client'
 
-import React, { createContext, useContext, useEffect } from 'react'
-import { useRouter, usePathname } from 'next/navigation'
-import { useAuth } from '@/hooks/auth/use-auth'
+import { createContext, useContext, ReactNode } from 'react'
+import { useRouter } from 'next/navigation'
+import { api } from '@/services/api/client'
 
-interface AuthContextData {
-  user: any
+interface AuthContextType {
   signIn: (credentials: { email: string; password: string }) => Promise<void>
   signUp: (data: {
     email: string
@@ -13,39 +12,37 @@ interface AuthContextData {
     firstName: string
     lastName: string
   }) => Promise<void>
-  signOut: () => void
+  signOut: () => Promise<void>
 }
 
-const AuthContext = createContext<AuthContextData>({} as AuthContextData)
+const AuthContext = createContext<AuthContextType | null>(null)
 
-export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const { user, signIn, signUp, signOut } = useAuth()
+export function AuthProvider({ children }: { children: ReactNode }) {
   const router = useRouter()
-  const pathname = usePathname()
 
-  useEffect(() => {
-    const token = localStorage.getItem('@KanbanLife:token')
-    const publicPaths = ['/login', '/register', '/about']
-    const authOnlyPaths = ['/login', '/register']
+  const signIn = async (credentials: { email: string; password: string }) => {
+    const response = await api.post('/auth/login', credentials)
+    const { token } = response.data
+    localStorage.setItem('@KanbanLife:token', token)
+    router.push('/projects')
+  }
 
-    if (!token && !publicPaths.includes(pathname || '')) {
+  const signUp = async (data: { email: string; password: string; firstName: string; lastName: string }) => {
+    await api.post('/auth/register', data)
+    router.push('/login')
+  }
+
+  const signOut = async () => {
+    try {
+      await api.post('/auth/logout')
+    } finally {
+      localStorage.removeItem('@KanbanLife:token')
       router.push('/login')
     }
-
-    if (token && authOnlyPaths.includes(pathname || '')) {
-      router.push('/projects')
-    }
-  }, [pathname, router])
+  }
 
   return (
-    <AuthContext.Provider
-      value={{
-        user,
-        signIn,
-        signUp,
-        signOut,
-      }}
-    >
+    <AuthContext.Provider value={{ signIn, signUp, signOut }}>
       {children}
     </AuthContext.Provider>
   )

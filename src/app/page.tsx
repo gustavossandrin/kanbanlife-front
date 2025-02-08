@@ -1,8 +1,6 @@
 'use client'
 
-import React, { FormEvent, useState } from 'react'
-import Link from 'next/link'
-import { useAuthContext } from '@/providers/auth-provider'
+import React from 'react'
 import Header from '@/components/shared/Header'
 import Footer from '@/components/shared/Footer'
 import Image from 'next/image'
@@ -80,7 +78,7 @@ export default function HomePage() {
                 Backend Integration
               </h2>
               <p className="text-gray-600 leading-relaxed">
-                The frontend seamlessly integrates with a robust backend developed by Gustavo, which provides all the necessary infrastructure for user management, authentication, and Kanban data manipulation. This integration demonstrates the project's versatility and ability to work with different technologies.
+                The frontend seamlessly integrates with a robust backend developed by Gustavo, which provides all the necessary infrastructure for user management, authentication, and Kanban data manipulation. This integration demonstrates the project&apos;s versatility and ability to work with different technologies.
               </p>
             </section>
           </div>
