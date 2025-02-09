@@ -1,6 +1,5 @@
 'use client'
 
-import { useEffect, useCallback } from 'react'
 import { useParams } from 'next/navigation'
 import { useBoard } from '@/hooks/kanban/use-board'
 import { KanbanBoard } from '@/components/kanban/KanbanBoard'

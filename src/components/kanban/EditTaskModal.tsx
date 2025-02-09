@@ -32,7 +32,7 @@ export function EditTaskModal({ isOpen, onClose, task, onSuccess }: Props) {
   const [title, setTitle] = useState(task.title)
   const [description, setDescription] = useState(task.description || '')
   const [color, setColor] = useState<TaskColor>(task.color)
-  const [labels, setLabels] = useState<string[]>(task.labels.map(label => label.title))
+  const [labels, setLabels] = useState<string[]>(task.labels)
   const [newLabel, setNewLabel] = useState('')
   const [isLoading, setIsLoading] = useState(false)
 

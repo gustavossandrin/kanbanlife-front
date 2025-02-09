@@ -1,13 +1,13 @@
 'use client'
 
-import { DragDropContext, Droppable, DropResult } from '@hello-pangea/dnd'
+import { DragDropContext, Droppable, DropResult, DroppableProvided, DroppableStateSnapshot } from '@hello-pangea/dnd'
 import { KanbanColumn } from './KanbanColumn'
 import { useBoard } from '@/hooks/kanban/use-board'
 import { toast } from 'sonner'
 import { Plus } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { CreateTaskModal } from './CreateTaskModal'
-import { Project, Column } from '@/domain/types/kanban'
+import { Column } from '@/domain/types/kanban'
 import { cn } from '@/lib/utils'
 
 interface Props {
@@ -69,14 +69,16 @@ export function KanbanBoard({ boardId }: Props) {
     // Get the task being moved
     const taskToMove = sourceColumn.tasks[source.index]
 
-    // Check if trying to drop on another task
-    const destinationTask = destinationColumn.tasks[destination.index]
-    if (destinationTask && destinationTask.id !== taskToMove.id) {
-      return
-    }
-
     // Create new columns state
     const newColumns = board.columns.map((col: Column) => {
+      // Handle same column movement
+      if (col.id === source.droppableId && source.droppableId === destination.droppableId) {
+        const newTasks = [...col.tasks]
+        newTasks.splice(source.index, 1)
+        newTasks.splice(destination.index, 0, taskToMove)
+        return { ...col, tasks: newTasks }
+      }
+
       // Remove from source column
       if (col.id === source.droppableId) {
         const newTasks = col.tasks.filter(task => task.id !== taskToMove.id)
@@ -86,24 +88,9 @@ export function KanbanBoard({ boardId }: Props) {
       // Add to destination column
       if (col.id === destination.droppableId) {
         const newTasks = [...col.tasks]
-        
-        // Calculate new position
-        const destinationTasks = [...col.tasks]
-        const topTask = destination.index > 0 ? destinationTasks[destination.index - 1] : null
-        const bottomTask = destination.index < destinationTasks.length 
-          ? destinationTasks[destination.index] 
-          : null
-
-        const newPosition = calculateNewPosition(
-          topTask?.position ?? null,
-          bottomTask?.position ?? null
-        )
-        
-        // Insert at the new position
         newTasks.splice(destination.index, 0, {
           ...taskToMove,
-          columnId: destination.droppableId,
-          position: newPosition
+          columnId: destination.droppableId
         })
         
         return { ...col, tasks: newTasks }
@@ -172,7 +159,7 @@ export function KanbanBoard({ boardId }: Props) {
                 </button>
               </div>
               <Droppable droppableId={column.id}>
-                {(provided, snapshot) => (
+                {(provided: DroppableProvided, snapshot: DroppableStateSnapshot) => (
                   <div
                     ref={provided.innerRef}
                     {...provided.droppableProps}
@@ -209,11 +196,3 @@ export function KanbanBoard({ boardId }: Props) {
     </>
   )
 }
-
-// Helper function to calculate new position
-function calculateNewPosition(topPosition: number | null, bottomPosition: number | null): number {
-  if (!topPosition && !bottomPosition) return 1000 // First task in empty column
-  if (!topPosition) return bottomPosition! - 1000 // Task moved to top
-  if (!bottomPosition) return topPosition + 1000 // Task moved to bottom
-  return topPosition + ((bottomPosition - topPosition) / 2) // Task moved between two tasks
-} 

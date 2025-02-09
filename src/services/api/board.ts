@@ -18,6 +18,10 @@ interface UpdateTaskPositionData {
   bottomPosition: number | null
 }
 
+interface UpdateTaskPositionResponse {
+  position: number
+}
+
 interface CreateTaskData {
   title: string
   description?: string
@@ -90,7 +94,7 @@ export const boardService = {
     return response.data
   },
 
-  updateTaskPosition: async ({ taskId, columnId, topPosition, bottomPosition }: UpdateTaskPositionData) => {
+  updateTaskPosition: async ({ taskId, columnId, topPosition, bottomPosition }: UpdateTaskPositionData): Promise<UpdateTaskPositionResponse> => {
     const response = await api.put(`/tasks/${taskId}/position`, {
       columnId,
       topPosition,

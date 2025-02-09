@@ -47,7 +47,7 @@ export interface Task {
   position: number
   color: TaskColor
   columnId: string
-  labels: Label[]
+  labels: string[]
   createdAt: Date
   updatedAt: Date
 }

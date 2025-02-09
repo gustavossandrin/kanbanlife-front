@@ -57,13 +57,14 @@ export function CreateTaskModal({ isOpen, onClose, columnId, onSuccess }: Props)
 
     try {
       setIsLoading(true)
-      await boardService.createTask({
+      const response = await boardService.createTask({
         title: title.trim(),
         description: description.trim() || undefined,
         color,
         columnId,
         labels,
       })
+      console.log('Task created response:', response)
       toast.success('Task created successfully')
       onSuccess()
       onClose()
