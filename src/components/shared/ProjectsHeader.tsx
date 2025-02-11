@@ -1,9 +1,9 @@
 import Image from 'next/image'
-import { LogOut, ArrowLeft } from 'lucide-react'
+import { LogOut } from 'lucide-react'
 import { useAuth } from '@/hooks/auth/use-auth'
 import { useRouter } from 'next/navigation'
 
-export function ProjectHeader() {
+export function ProjectsHeader() {
   const { signOut } = useAuth()
   const router = useRouter()
 
@@ -17,12 +17,7 @@ export function ProjectHeader() {
 
   return (
     <header className="flex h-14 items-center justify-between border-b bg-white px-4">
-      <button
-        onClick={() => router.push('/projects')}
-        className="flex items-center gap-2 rounded p-1.5 text-gray-700 hover:bg-gray-100"
-      >
-        <ArrowLeft className="h-5 w-5" />
-      </button>
+      <div className="w-10" /> {/* Espaçador para manter o logo centralizado */}
       
       <div className="flex items-center justify-center">
         <Image

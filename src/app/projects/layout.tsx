@@ -1,16 +1,19 @@
-'use client'
+'use client';
 
-import { ProjectHeader } from '@/components/shared/ProjectHeader'
+import { ReactNode } from 'react';
+import { SmallHeader } from '@/components/shared/SmallHeader';
 
-export default function ProjectLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+interface ProjectsLayoutProps {
+  children: ReactNode;
+}
+
+export default function ProjectsLayout({ children }: ProjectsLayoutProps) {
   return (
-    <div className="flex min-h-screen flex-col">
-      <ProjectHeader />
+    <div className="flex flex-col min-h-screen">
+      <div className="sticky top-0 z-10">
+        <SmallHeader />
+      </div>
       {children}
     </div>
-  )
+  );
 } 

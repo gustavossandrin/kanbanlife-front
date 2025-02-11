@@ -3,8 +3,15 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { api } from '@/services/api/client'
 
+interface CreateColumnData {
+  name: string;
+  maxTasks: number | null;
+  position: number;
+}
+
 interface CreateProjectData {
-  name: string
+  name: string;
+  columns: CreateColumnData[];
 }
 
 interface Column {
@@ -40,7 +47,7 @@ export function useProjects() {
 
   const createProject = useMutation({
     mutationFn: async (data: CreateProjectData) => {
-      const response = await api.post('/projects', data)
+      const response = await api.post('/projects/new', data)
       return response.data
     },
     onSuccess: () => {

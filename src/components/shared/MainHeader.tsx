@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import Image from 'next/image'
-import { Layout, ChevronDown, Settings, LogOut } from 'lucide-react'
+import { Layout, ChevronDown, Settings, LogOut, Plus, ArrowLeft } from 'lucide-react'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -52,7 +52,13 @@ export function MainHeader() {
 
   return (
     <header className="flex h-14 items-center justify-between border-b bg-white px-4">
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-4">
+        <button
+          onClick={() => router.push('/projects')}
+          className="flex items-center gap-2 rounded p-1.5 text-gray-700 hover:bg-gray-100"
+        >
+          <ArrowLeft className="h-5 w-5" />
+        </button>
         <DropdownMenu>
           <DropdownMenuTrigger 
             className="flex items-center gap-2 rounded px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-100"
@@ -66,15 +72,24 @@ export function MainHeader() {
             {isLoading ? (
               <div className="p-2 text-center text-sm text-gray-500">Loading...</div>
             ) : (
-              boards.map((board) => (
+              <>
+                {boards.map((board) => (
+                  <DropdownMenuItem
+                    key={board.id}
+                    onClick={() => router.push(`/board/${board.id}`)}
+                    className="cursor-pointer hover:bg-gray-50"
+                  >
+                    {board.name}
+                  </DropdownMenuItem>
+                ))}
                 <DropdownMenuItem
-                  key={board.id}
-                  onClick={() => router.push(`/board/${board.id}`)}
-                  className="cursor-pointer hover:bg-gray-50"
+                  onClick={() => router.push('/projects/new')}
+                  className="cursor-pointer hover:bg-gray-50 mt-2 border-t border-gray-100 text-purple-600"
                 >
-                  {board.name}
+                  <Plus className="mr-2 h-4 w-4" />
+                  Create New Board
                 </DropdownMenuItem>
-              ))
+              </>
             )}
           </DropdownMenuContent>
         </DropdownMenu>
