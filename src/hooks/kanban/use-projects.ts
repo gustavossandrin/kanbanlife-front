@@ -2,6 +2,7 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { api } from '@/services/api/client'
+import { Project } from '@/domain/types/kanban'
 
 interface CreateColumnData {
   name: string;
@@ -14,61 +15,86 @@ interface CreateProjectData {
   columns: CreateColumnData[];
 }
 
-interface Column {
-  id: string;
+interface UpdateColumnData {
+  id?: string;
   name: string;
   maxTasks: number | null;
   position: number;
 }
 
-export interface Project {
+interface UpdateProjectData {
   name: string;
-  userId: string;
-  id: string;
-  createdAt: string;
-  updatedAt: string;
-  columns: Column[];
+  columns: UpdateColumnData[];
+}
+
+const projectService = {
+  getProjects: async () => {
+    const response = await api.get('/projects')
+    return response.data
+  },
+
+  getProject: async (id: string) => {
+    const response = await api.get(`/projects/${id}`)
+    return response.data
+  },
+
+  createProject: async (data: CreateProjectData) => {
+    const response = await api.post('/projects', data)
+    return response.data
+  },
+
+  updateProject: async (id: string, data: UpdateProjectData) => {
+    const response = await api.put(`/projects/${id}`, data)
+    return response.data
+  },
+
+  deleteProject: async (id: string) => {
+    const response = await api.delete(`/projects/${id}`)
+    return response.data
+  },
 }
 
 export function useProjects() {
   const queryClient = useQueryClient()
 
-  const query = useQuery<Project[]>({
+  const { data: projects = [], isLoading, error } = useQuery<Project[]>({
     queryKey: ['projects'],
-    queryFn: async () => {
-      try {
-        const response = await api.get('/projects')
-        return response.data
-      } catch {
-        throw new Error('Failed to fetch projects')
-      }
-    },
+    queryFn: projectService.getProjects,
   })
 
-  const createProject = useMutation({
-    mutationFn: async (data: CreateProjectData) => {
-      const response = await api.post('/projects/new', data)
-      return response.data
-    },
+  const { mutateAsync: getProject } = useMutation({
+    mutationFn: projectService.getProject,
+  })
+
+  const { mutateAsync: createProject } = useMutation({
+    mutationFn: projectService.createProject,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['projects'] })
     },
   })
 
-  const deleteProject = useMutation({
-    mutationFn: async (projectId: string) => {
-      await api.delete(`/projects/${projectId}`)
+  const { mutateAsync: updateProject } = useMutation({
+    mutationFn: ({ id, data }: { id: string; data: UpdateProjectData }) => 
+      projectService.updateProject(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['projects'] })
     },
+  })
+
+  const { mutateAsync: deleteProject } = useMutation({
+    mutationFn: projectService.deleteProject,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['projects'] })
     },
   })
 
   return {
-    projects: query.data ?? [],
-    isLoading: query.isLoading,
-    error: query.error,
-    createProject: createProject.mutate,
-    deleteProject: deleteProject.mutate,
+    projects,
+    isLoading,
+    error,
+    getProject,
+    createProject,
+    updateProject,
+    deleteProject,
   }
 } 

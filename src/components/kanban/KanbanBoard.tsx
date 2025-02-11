@@ -191,6 +191,7 @@ export function KanbanBoard({ boardId }: Props) {
           onClose={handleCloseCreateTask}
           columnId={selectedColumnId}
           onSuccess={handleTaskCreated}
+          column={board.columns.find((col) => col.id === selectedColumnId)!}
         />
       )}
     </>

@@ -16,6 +16,10 @@ interface Props {
   onClose: () => void
   columnId: string
   onSuccess: () => void
+  column: {
+    maxTasks: number
+    tasks: any[]
+  }
 }
 
 const colorOptions = [
@@ -29,7 +33,7 @@ const colorOptions = [
   { value: TaskColor.MAGENTA, bg: 'bg-pink-100', text: 'text-pink-800', border: 'border-pink-200' },
 ]
 
-export function CreateTaskModal({ isOpen, onClose, columnId, onSuccess }: Props) {
+export function CreateTaskModal({ isOpen, onClose, columnId, onSuccess, column }: Props) {
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [color, setColor] = useState<TaskColor>(TaskColor.YELLOW)
@@ -38,6 +42,7 @@ export function CreateTaskModal({ isOpen, onClose, columnId, onSuccess }: Props)
   const [isLoading, setIsLoading] = useState(false)
 
   const selectedColor = colorOptions.find((option) => option.value === color)
+  const isColumnFull = column.maxTasks > 0 && column.tasks.length >= column.maxTasks
 
   const handleAddLabel = () => {
     if (!newLabel.trim()) return
@@ -52,6 +57,11 @@ export function CreateTaskModal({ isOpen, onClose, columnId, onSuccess }: Props)
   const handleSubmit = async () => {
     if (!title.trim()) {
       toast.error('Title is required')
+      return
+    }
+
+    if (isColumnFull) {
+      toast.error(`Column has reached its maximum limit of ${column.maxTasks} tasks`)
       return
     }
 
@@ -80,96 +90,114 @@ export function CreateTaskModal({ isOpen, onClose, columnId, onSuccess }: Props)
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className={cn("sm:max-w-[500px]", selectedColor?.bg)}>
         <DialogHeader>
-          <DialogTitle>Create New Task</DialogTitle>
+          <DialogTitle>
+            Create New Task
+            {column.maxTasks > 0 && (
+              <div className="text-sm font-normal text-gray-500 mt-1">
+                {column.tasks.length} of {column.maxTasks} tasks
+              </div>
+            )}
+          </DialogTitle>
         </DialogHeader>
 
-        <div className={cn("grid gap-4 py-4", selectedColor?.bg)}>
-          <div className="grid gap-2">
-            <Label htmlFor="title">Title</Label>
-            <Input
-              id="title"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              maxLength={100}
-              placeholder="Task title"
-              className={cn("border-0 bg-white/50", selectedColor?.text)}
-            />
+        {isColumnFull ? (
+          <div className="py-4">
+            <div className="rounded-lg bg-red-50 p-4 text-center text-red-500">
+              <p className="font-medium">Column is full</p>
+              <p className="text-sm">Maximum limit of {column.maxTasks} tasks reached</p>
+            </div>
           </div>
-
-          <div className="grid gap-2">
-            <Label htmlFor="description">Description</Label>
-            <Textarea
-              id="description"
-              value={description}
-              onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setDescription(e.target.value)}
-              maxLength={500}
-              placeholder="Task description"
-              className={cn("resize-none border-0 bg-white/50", selectedColor?.text)}
-            />
-          </div>
-
-          <div className="grid gap-2">
-            <Label>Color</Label>
-            <div className="flex flex-wrap gap-2">
-              {colorOptions.map((option) => (
-                <button
-                  key={option.value}
-                  onClick={() => setColor(option.value)}
-                  className={`h-8 w-8 rounded-full border-2 transition-all ${
-                    option.bg
-                  } ${option.border} ${
-                    color === option.value ? 'scale-110 ring-2 ring-gray-400' : ''
-                  }`}
+        ) : (
+          <>
+            <div className={cn("grid gap-4 py-4", selectedColor?.bg)}>
+              <div className="grid gap-2">
+                <Label htmlFor="title">Title</Label>
+                <Input
+                  id="title"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  maxLength={100}
+                  placeholder="Task title"
+                  className={cn("border-0 bg-white/50", selectedColor?.text)}
                 />
-              ))}
-            </div>
-          </div>
+              </div>
 
-          <div className="grid gap-2">
-            <Label>Labels</Label>
-            <div className="flex flex-wrap gap-2">
-              {labels.map((label) => (
-                <span
-                  key={label}
-                  className="flex items-center gap-1 rounded-full bg-gray-100 px-3 py-1 text-sm"
-                >
-                  {label}
-                  <button
-                    onClick={() => handleRemoveLabel(label)}
-                    className="text-gray-500 hover:text-gray-700"
+              <div className="grid gap-2">
+                <Label htmlFor="description">Description</Label>
+                <Textarea
+                  id="description"
+                  value={description}
+                  onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setDescription(e.target.value)}
+                  maxLength={500}
+                  placeholder="Task description"
+                  className={cn("resize-none border-0 bg-white/50", selectedColor?.text)}
+                />
+              </div>
+
+              <div className="grid gap-2">
+                <Label>Color</Label>
+                <div className="flex flex-wrap gap-2">
+                  {colorOptions.map((option) => (
+                    <button
+                      key={option.value}
+                      onClick={() => setColor(option.value)}
+                      className={`h-8 w-8 rounded-full border-2 transition-all ${
+                        option.bg
+                      } ${option.border} ${
+                        color === option.value ? 'scale-110 ring-2 ring-gray-400' : ''
+                      }`}
+                    />
+                  ))}
+                </div>
+              </div>
+
+              <div className="grid gap-2">
+                <Label>Labels</Label>
+                <div className="flex flex-wrap gap-2">
+                  {labels.map((label) => (
+                    <span
+                      key={label}
+                      className="flex items-center gap-1 rounded-full bg-gray-100 px-3 py-1 text-sm"
+                    >
+                      {label}
+                      <button
+                        onClick={() => handleRemoveLabel(label)}
+                        className="text-gray-500 hover:text-gray-700"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </span>
+                  ))}
+                </div>
+                <div className="flex gap-2">
+                  <Input
+                    value={newLabel}
+                    onChange={(e) => setNewLabel(e.target.value)}
+                    placeholder="Add label"
+                    onKeyDown={(e) => e.key === 'Enter' && handleAddLabel()}
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    onClick={handleAddLabel}
                   >
-                    <X className="h-3 w-3" />
-                  </button>
-                </span>
-              ))}
+                    <Check className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
             </div>
-            <div className="flex gap-2">
-              <Input
-                value={newLabel}
-                onChange={(e) => setNewLabel(e.target.value)}
-                placeholder="Add label"
-                onKeyDown={(e) => e.key === 'Enter' && handleAddLabel()}
-              />
-              <Button
-                type="button"
-                variant="outline"
-                size="icon"
-                onClick={handleAddLabel}
-              >
-                <Check className="h-4 w-4" />
+
+            <div className="flex justify-end gap-3">
+              <Button variant="outline" onClick={onClose}>
+                Cancel
+              </Button>
+              <Button onClick={handleSubmit} disabled={isLoading}>
+                Create Task
               </Button>
             </div>
-          </div>
-        </div>
-
-        <div className="flex justify-end gap-3">
-          <Button variant="outline" onClick={onClose}>
-            Cancel
-          </Button>
-          <Button onClick={handleSubmit} disabled={isLoading}>
-            Create Task
-          </Button>
-        </div>
+          </>
+        )}
       </DialogContent>
     </Dialog>
   )

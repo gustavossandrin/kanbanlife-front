@@ -1,11 +1,42 @@
 'use client';
 
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useProjects } from '@/hooks/kanban/use-projects';
+import { Pencil, Trash2 } from 'lucide-react';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Button } from '@/components/ui/button';
+import { api } from '@/services/api/client';
 
 export default function ProjectsPage() {
   const router = useRouter();
-  const { projects, isLoading, error } = useProjects();
+  const { projects, isLoading, error, deleteProject } = useProjects();
+  const [projectToDelete, setProjectToDelete] = useState<string | null>(null);
+
+  const handleEdit = (projectId: string) => {
+    router.push(`/projects/${projectId}/edit`);
+  };
+
+  const handleDelete = async () => {
+    if (!projectToDelete) return;
+    
+    try {
+      await deleteProject(projectToDelete);
+    } catch (error) {
+      console.error('Error deleting project:', error);
+    } finally {
+      setProjectToDelete(null);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -58,14 +89,63 @@ export default function ProjectsPage() {
             {projects.map((project) => (
               <div
                 key={project.id}
-                className="bg-white p-4 rounded-lg shadow hover:shadow-md transition-shadow cursor-pointer"
-                onClick={() => router.push(`/board/${project.id}`)}
+                className="bg-gradient-to-br from-purple-50 to-white p-6 rounded-lg shadow-sm hover:shadow-md transition-all border border-purple-100"
               >
-                <h2 className="text-xl font-semibold">{project.name}</h2>
+                <div className="flex justify-between items-start">
+                  <div className="flex-1">
+                    <h2 
+                      className="text-xl font-semibold cursor-pointer text-gray-800 hover:text-purple-600 transition-colors mb-2"
+                      onClick={() => router.push(`/board/${project.id}`)}
+                    >
+                      {project.name}
+                    </h2>
+                    <p className="text-sm text-gray-500">
+                      {project.columns?.length} {project.columns?.length === 1 ? 'column' : 'columns'}
+                    </p>
+                  </div>
+                  <div className="flex gap-2 ml-4">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => handleEdit(project.id)}
+                      className="text-gray-400 hover:text-purple-600 hover:bg-purple-50"
+                    >
+                      <Pencil size={18} />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => setProjectToDelete(project.id)}
+                      className="text-gray-400 hover:text-red-600 hover:bg-red-50"
+                    >
+                      <Trash2 size={18} />
+                    </Button>
+                  </div>
+                </div>
               </div>
             ))}
           </div>
         )}
+
+        <AlertDialog open={!!projectToDelete} onOpenChange={() => setProjectToDelete(null)}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This action cannot be undone. This will permanently delete the project and all its data.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={handleDelete}
+                className="bg-red-600 text-white hover:bg-red-700"
+              >
+                Delete
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </div>
   );

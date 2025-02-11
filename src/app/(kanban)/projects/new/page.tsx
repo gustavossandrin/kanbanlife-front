@@ -4,11 +4,11 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { SmallHeader } from '@/components/shared/SmallHeader';
 import { Input } from '@/components/ui/input';
 import { ChangeEvent } from 'react';
 import { DndContext, DragEndEvent, DragOverEvent } from '@dnd-kit/core';
-import { SortableContext } from '@dnd-kit/sortable';
+import { SortableContext, useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import { Trash2, GripVertical, Plus, ArrowLeft } from 'lucide-react';
 import { api } from '@/services/api/client';
 import { useProjects } from '@/hooks/kanban/use-projects';
@@ -54,6 +54,37 @@ const defaultColumns: Column[] = [
   { id: '3', name: 'Review' },
   { id: '4', name: 'Done' },
 ];
+
+interface SortableColumnProps {
+  id: string;
+  children: React.ReactNode;
+}
+
+function SortableColumn({ id, children }: SortableColumnProps) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+  } = useSortable({ id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
+
+  return (
+    <div ref={setNodeRef} style={style}>
+      <div className="flex items-center space-x-3 bg-gray-50 p-3 rounded-md">
+        <div className="text-gray-400 hover:text-gray-600 cursor-move" {...attributes} {...listeners}>
+          <GripVertical size={20} />
+        </div>
+        {children}
+      </div>
+    </div>
+  );
+}
 
 export default function NewProject() {
   const router = useRouter();
@@ -150,10 +181,6 @@ export default function NewProject() {
 
   return (
     <div className="flex flex-col min-h-screen">
-      <div className="sticky top-0 z-10">
-        <SmallHeader />
-      </div>
-      
       <div className="flex-1 container mx-auto py-6">
         {/* Stepper */}
         <div className="flex items-center justify-center mb-8">
@@ -209,14 +236,8 @@ export default function NewProject() {
               <DndContext onDragEnd={handleDragEnd}>
                 <SortableContext items={columns.map(col => col.id)}>
                   <div className="space-y-3">
-                    {columns.map((column, index) => (
-                      <div
-                        key={column.id}
-                        className="flex items-center space-x-3 bg-gray-50 p-3 rounded-md"
-                      >
-                        <div className="text-gray-400 hover:text-gray-600 cursor-move">
-                          <GripVertical size={20} />
-                        </div>
+                    {columns.map((column) => (
+                      <SortableColumn key={column.id} id={column.id}>
                         <Input
                           value={column.name}
                           onChange={(e: ChangeEvent<HTMLInputElement>) => handleColumnNameChange(column.id, e.target.value)}
@@ -231,7 +252,7 @@ export default function NewProject() {
                         >
                           <Trash2 size={20} />
                         </Button>
-                      </div>
+                      </SortableColumn>
                     ))}
                   </div>
                 </SortableContext>
