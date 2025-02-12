@@ -10,7 +10,6 @@ import { DndContext, DragEndEvent } from '@dnd-kit/core';
 import { SortableContext, useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { Trash2, GripVertical, Plus, ArrowLeft } from 'lucide-react';
-import { api } from '@/services/api/client';
 import { useProjects } from '@/hooks/kanban/use-projects';
 import { toast } from 'sonner'
 

@@ -6,11 +6,10 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ChangeEvent } from 'react';
-import { DndContext, DragEndEvent, DragOverEvent } from '@dnd-kit/core';
+import { DndContext, DragEndEvent } from '@dnd-kit/core';
 import { SortableContext, useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { Trash2, GripVertical, Plus, ArrowLeft } from 'lucide-react';
-import { api } from '@/services/api/client';
 import { useProjects } from '@/hooks/kanban/use-projects';
 
 type Step = {

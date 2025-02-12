@@ -15,7 +15,6 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Button } from '@/components/ui/button';
-import { api } from '@/services/api/client';
 
 export default function ProjectsPage() {
   const router = useRouter();

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import Image from 'next/image'
 import { Layout, ChevronDown, Settings, LogOut, Plus, ArrowLeft } from 'lucide-react'
 import {
@@ -34,7 +34,7 @@ export function MainHeader() {
     }
   }
 
-  const loadBoards = async () => {
+  const loadBoards = useCallback(async () => {
     if (isLoading) return
     
     try {
@@ -46,13 +46,13 @@ export function MainHeader() {
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [isLoading])
 
   useEffect(() => {
     if (!isNewProjectPage) {
       loadBoards()
     }
-  }, [isNewProjectPage])
+  }, [isNewProjectPage, loadBoards])
 
   return (
     <header className={`flex h-14 items-center justify-between border-b px-4 ${isNewProjectPage ? 'bg-gray-100' : 'bg-white'}`}>

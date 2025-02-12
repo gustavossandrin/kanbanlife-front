@@ -10,6 +10,7 @@ import { TaskColor, boardService } from '@/services/api/board'
 import { toast } from 'sonner'
 import { Check, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { Task } from '@/domain/types/kanban'
 
 interface Props {
   isOpen: boolean
@@ -18,7 +19,7 @@ interface Props {
   onSuccess: () => void
   column: {
     maxTasks: number
-    tasks: any[]
+    tasks: Task[]
   }
 }
 

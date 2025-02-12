@@ -1,11 +1,9 @@
 import Image from 'next/image'
 import { LogOut } from 'lucide-react'
 import { useAuth } from '@/hooks/auth/use-auth'
-import { useRouter } from 'next/navigation'
 
 export function ProjectsHeader() {
   const { signOut } = useAuth()
-  const router = useRouter()
 
   const handleLogout = async () => {
     try {
