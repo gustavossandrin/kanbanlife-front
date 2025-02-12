@@ -12,6 +12,7 @@ import { CSS } from '@dnd-kit/utilities';
 import { Trash2, GripVertical, Plus, ArrowLeft } from 'lucide-react';
 import { api } from '@/services/api/client';
 import { useProjects } from '@/hooks/kanban/use-projects';
+import { toast } from 'sonner'
 
 type Column = {
   id: string;
@@ -145,6 +146,8 @@ export default function EditProject() {
         }
       });
 
+      toast.success('Project updated successfully');
+      await new Promise(resolve => setTimeout(resolve, 500)); // Pequeno delay para garantir que o backend processou
       router.push('/projects');
     } catch (err) {
       console.error('Error updating project:', err);

@@ -99,9 +99,6 @@ export default function ProjectsPage() {
                     >
                       {project.name}
                     </h2>
-                    <p className="text-sm text-gray-500">
-                      {project.columns?.length} {project.columns?.length === 1 ? 'column' : 'columns'}
-                    </p>
                   </div>
                   <div className="flex gap-2 ml-4">
                     <Button
