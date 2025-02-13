@@ -1,41 +1,67 @@
 # KanbanLife
 
-Um quadro Kanban intuitivo para gerenciamento de projetos.
+Welcome to KanbanLife - Your Intuitive Project Management Solution!
 
-## Pré-requisitos
+![Board Overview](public/board.png)
 
-- Node.js 18+ instalado
-- NPM ou Yarn
-- Backend rodando na porta 3333 (ou ajuste a URL no .env.local)
+KanbanLife is a powerful yet simple project management tool that helps you organize your tasks and projects efficiently. With our intuitive interface, you can easily create, manage, and track your projects in a visual way.
 
-## Como rodar o projeto
+## Create Projects with Ease
 
-1. Instale as dependências:
+![Create Project](public/create_project.png)
+
+Creating a new project is straightforward:
+- Give your project a name
+- Set a description
+- Choose your preferred columns
+- Start organizing your tasks immediately
+
+## Customize Your Tasks
+
+![Create Task](public/create_task.png)
+
+Easily create and customize tasks:
+- Add detailed descriptions
+- Set priorities
+- Track progress
+- Move tasks between columns with drag and drop
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js 18+ installed
+- NPM or Yarn
+- Backend running on port 3333 (or adjust URL in .env.local)
+
+### Installation
+
+1. Install dependencies:
 ```bash
 npm install
 ```
 
-2. Configure as variáveis de ambiente:
-- Copie o arquivo `.env.local.example` para `.env.local`
-- Ajuste a URL da API se necessário
+2. Configure environment:
+- Copy `.env.local.example` to `.env.local`
+- Adjust API URL if needed
 
-3. Rode o projeto em desenvolvimento:
+3. Run development server:
 ```bash
 npm run dev
 ```
 
-4. Acesse o projeto:
+4. Access the project:
 - Frontend: http://localhost:3000
-- A API deve estar rodando em http://localhost:3333
+- API should be running at http://localhost:3333
 
-## Estrutura do Projeto
+## Project Structure
 
-- `src/app/` - Páginas e rotas (Next.js App Router)
-- `src/components/` - Componentes React reutilizáveis
-- `src/domain/` - Tipos e interfaces
-- `src/hooks/` - Hooks customizados
-- `src/services/` - Serviços e integrações
-- `src/stores/` - Gerenciamento de estado
+- `src/app/` - Pages and routes (Next.js App Router)
+- `src/components/` - Reusable React components
+- `src/domain/` - Types and interfaces
+- `src/hooks/` - Custom hooks
+- `src/services/` - Services and integrations
+- `src/stores/` - State management
 
 ## Funcionalidades
 

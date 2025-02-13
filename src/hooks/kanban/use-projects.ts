@@ -54,16 +54,22 @@ const projectService = {
   },
 }
 
+export function useProject(id: string) {
+  return useQuery({
+    queryKey: ['project', id],
+    queryFn: () => projectService.getProject(id),
+    enabled: !!id,
+    staleTime: 1000 * 60 * 5, // 5 minutes
+  })
+}
+
 export function useProjects() {
   const queryClient = useQueryClient()
 
   const { data: projects = [], isLoading, error } = useQuery<Project[]>({
     queryKey: ['projects'],
     queryFn: projectService.getProjects,
-  })
-
-  const { mutateAsync: getProject } = useMutation({
-    mutationFn: projectService.getProject,
+    staleTime: 1000 * 60 * 5, // 5 minutes
   })
 
   const { mutateAsync: createProject } = useMutation({
@@ -76,15 +82,17 @@ export function useProjects() {
   const { mutateAsync: updateProject } = useMutation({
     mutationFn: ({ id, data }: { id: string; data: UpdateProjectData }) => 
       projectService.updateProject(id, data),
-    onSuccess: () => {
+    onSuccess: (_, { id }) => {
       queryClient.invalidateQueries({ queryKey: ['projects'] })
+      queryClient.invalidateQueries({ queryKey: ['project', id] })
     },
   })
 
   const { mutateAsync: deleteProject } = useMutation({
     mutationFn: projectService.deleteProject,
-    onSuccess: () => {
+    onSuccess: (_, id) => {
       queryClient.invalidateQueries({ queryKey: ['projects'] })
+      queryClient.invalidateQueries({ queryKey: ['project', id] })
     },
   })
 
@@ -92,7 +100,6 @@ export function useProjects() {
     projects,
     isLoading,
     error,
-    getProject,
     createProject,
     updateProject,
     deleteProject,

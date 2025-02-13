@@ -11,77 +11,101 @@ export default function HomePage() {
       <Header />
       
       <main className="flex-grow container mx-auto px-4 py-12">
-        <div className="max-w-3xl mx-auto space-y-8">
-          <div className="text-center">
-            <h1 className="text-4xl font-bold text-gray-900 mb-4">
-              About KanbanLife
+        <div className="max-w-4xl mx-auto space-y-16">
+          {/* Hero Section */}
+          <section className="text-center space-y-6">
+            <h1 className="text-5xl font-bold text-gray-900">
+              Organize Your Projects with Ease
             </h1>
-            <div className="flex justify-center mb-8">
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+              KanbanLife is a powerful yet simple project management tool that helps you organize your tasks and projects efficiently.
+            </p>
+            <div className="mt-8">
               <Image
-                src="/logo_kanban.png"
-                alt="Kanban Life Logo"
-                width={200}
-                height={60}
+                src="/board.png"
+                alt="KanbanLife Board Overview"
+                width={800}
+                height={450}
+                className="rounded-lg shadow-lg"
                 priority
               />
             </div>
-          </div>
+          </section>
 
-          <div className="bg-white rounded-lg shadow-md p-8 space-y-6">
-            <section className="space-y-4">
-              <h2 className="text-2xl font-semibold text-gray-900">
-                An Innovative Project
+          {/* Create Project Section */}
+          <section className="space-y-8">
+            <div className="text-center">
+              <h2 className="text-3xl font-bold text-gray-900 mb-4">
+                Create Projects in Minutes
               </h2>
-              <p className="text-gray-600 leading-relaxed">
-                KanbanLife is a unique project that demonstrates the power of integration between Artificial Intelligence and modern development. The frontend was developed entirely with AI assistance, using best development practices and modern technologies such as Next.js, TypeScript, and Tailwind CSS.
+              <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+                Setting up your project is straightforward. Name it, describe it, and start organizing your tasks right away.
               </p>
-            </section>
+            </div>
+            <div className="flex justify-center">
+              <Image
+                src="/create_project.png"
+                alt="Create New Project"
+                width={700}
+                height={400}
+                className="rounded-lg shadow-lg"
+              />
+            </div>
+          </section>
 
-            <section className="space-y-4">
-              <h2 className="text-2xl font-semibold text-gray-900">
-                Technologies Used
+          {/* Task Management Section */}
+          <section className="space-y-8">
+            <div className="text-center">
+              <h2 className="text-3xl font-bold text-gray-900 mb-4">
+                Customize Your Tasks
               </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="bg-purple-50 p-4 rounded-lg">
-                  <h3 className="font-semibold text-purple-700 mb-2">Frontend</h3>
-                  <ul className="list-disc list-inside text-gray-600 space-y-2">
-                    <li>Next.js 14</li>
-                    <li>TypeScript</li>
-                    <li>Tailwind CSS</li>
-                    <li>React Query</li>
-                    <li>Axios</li>
-                  </ul>
-                </div>
-                <div className="bg-blue-50 p-4 rounded-lg">
-                  <h3 className="font-semibold text-blue-700 mb-2">Backend</h3>
-                  <ul className="list-disc list-inside text-gray-600 space-y-2">
-                    <li>RESTful API</li>
-                    <li>JWT Authentication</li>
-                    <li>Relational Database</li>
-                    <li>Modern Architecture</li>
-                  </ul>
-                </div>
+              <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+                Create detailed tasks, set priorities, and track progress. Move tasks between columns with our intuitive drag-and-drop interface.
+              </p>
+            </div>
+            <div className="flex justify-center">
+              <Image
+                src="/create_task.png"
+                alt="Task Creation"
+                width={700}
+                height={400}
+                className="rounded-lg shadow-lg"
+              />
+            </div>
+          </section>
+
+          {/* Features Grid */}
+          <section className="space-y-8">
+            <h2 className="text-3xl font-bold text-gray-900 text-center">
+              Key Features
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              <div className="bg-white p-6 rounded-lg shadow-md">
+                <h3 className="text-xl font-semibold text-gray-900 mb-3">
+                  Intuitive Interface
+                </h3>
+                <p className="text-gray-600">
+                  Clean and modern design that makes project management a breeze.
+                </p>
               </div>
-            </section>
-
-            <section className="space-y-4">
-              <h2 className="text-2xl font-semibold text-gray-900">
-                AI-Assisted Development
-              </h2>
-              <p className="text-gray-600 leading-relaxed">
-                The entire frontend of this project was developed with Artificial Intelligence assistance, showcasing how AI can be a powerful tool in modern software development. The code was generated following best development practices, design patterns, and maintaining a high level of quality.
-              </p>
-            </section>
-
-            <section className="space-y-4">
-              <h2 className="text-2xl font-semibold text-gray-900">
-                Backend Integration
-              </h2>
-              <p className="text-gray-600 leading-relaxed">
-                The frontend seamlessly integrates with a robust backend developed by Gustavo, which provides all the necessary infrastructure for user management, authentication, and Kanban data manipulation. This integration demonstrates the project&apos;s versatility and ability to work with different technologies.
-              </p>
-            </section>
-          </div>
+              <div className="bg-white p-6 rounded-lg shadow-md">
+                <h3 className="text-xl font-semibold text-gray-900 mb-3">
+                  Drag and Drop
+                </h3>
+                <p className="text-gray-600">
+                  Easily move tasks between different stages of your workflow.
+                </p>
+              </div>
+              <div className="bg-white p-6 rounded-lg shadow-md">
+                <h3 className="text-xl font-semibold text-gray-900 mb-3">
+                  Customizable Boards
+                </h3>
+                <p className="text-gray-600">
+                  Create columns that match your team&apos;s unique workflow.
+                </p>
+              </div>
+            </div>
+          </section>
         </div>
       </main>
       

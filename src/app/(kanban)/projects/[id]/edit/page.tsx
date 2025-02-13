@@ -10,7 +10,7 @@ import { DndContext, DragEndEvent } from '@dnd-kit/core';
 import { SortableContext, useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { Trash2, GripVertical, Plus, ArrowLeft } from 'lucide-react';
-import { useProjects } from '@/hooks/kanban/use-projects';
+import { useProjects, useProject } from '@/hooks/kanban/use-projects';
 import { toast } from 'sonner'
 
 type Column = {
@@ -53,33 +53,23 @@ function SortableColumn({ id, children }: SortableColumnProps) {
 export default function EditProject() {
   const router = useRouter();
   const params = useParams();
-  const { getProject, updateProject } = useProjects();
+  const { updateProject } = useProjects();
+  const { data: project, isLoading: isLoadingProject } = useProject(params.id as string);
   const [isLoading, setIsLoading] = useState(false);
   const [projectName, setProjectName] = useState('');
   const [error, setError] = useState('');
-  const [columns, setColumns] = useState<Column[]>([]);
+  const [columns, setColumns] = useState<Column[]>([{ id: 'default', name: 'To Do' }]);
 
   useEffect(() => {
-    const loadProject = async () => {
-      try {
-        setIsLoading(true);
-        const project = await getProject(params.id as string);
-        setProjectName(project.name);
-        setColumns(project.columns.map((col: { id: string; name: string; maxTasks: number }) => ({
-          id: col.id,
-          name: col.name,
-          taskLimit: col.maxTasks,
-        })));
-      } catch (err) {
-        console.error('Error loading project:', err);
-        setError('Failed to load project');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    loadProject();
-  }, [params.id, getProject]);
+    if (!project || !project.columns) return;
+    
+    setProjectName(project.name);
+    setColumns(project.columns.map((col: { id: string; name: string; maxTasks: number }) => ({
+      id: col.id,
+      name: col.name,
+      taskLimit: col.maxTasks,
+    })));
+  }, [project]);
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
@@ -146,7 +136,7 @@ export default function EditProject() {
       });
 
       toast.success('Project updated successfully');
-      await new Promise(resolve => setTimeout(resolve, 500)); // Pequeno delay para garantir que o backend processou
+      await new Promise(resolve => setTimeout(resolve, 500));
       router.push('/projects');
     } catch (err) {
       console.error('Error updating project:', err);
@@ -156,7 +146,7 @@ export default function EditProject() {
     }
   };
 
-  if (isLoading) {
+  if (isLoadingProject || isLoading) {
     return (
       <div className="flex flex-col min-h-screen">
         <div className="flex-1 container mx-auto py-6 flex items-center justify-center">

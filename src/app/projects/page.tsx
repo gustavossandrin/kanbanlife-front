@@ -62,12 +62,12 @@ export default function ProjectsPage() {
 
   return (
     <div className="flex flex-col min-h-screen">
-      <div className="flex-1 container mx-auto py-6">
-        <div className="flex justify-between items-center mb-6">
+      <div className="flex-1 container mx-auto py-6 px-4 md:px-6">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 md:gap-0 mb-6">
           <h1 className="text-2xl font-bold">My Projects</h1>
           <button
             onClick={() => router.push('/projects/new')}
-            className="bg-purple-600 text-white px-4 py-2 rounded-md hover:bg-purple-700 transition-colors"
+            className="bg-purple-600 text-white px-4 py-2 rounded-md hover:bg-purple-700 transition-colors w-full md:w-auto"
           >
             New Project
           </button>

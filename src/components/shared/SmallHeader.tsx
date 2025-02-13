@@ -38,10 +38,10 @@ export function SmallHeader() {
           <DropdownMenuTrigger>
             <Settings className="h-5 w-5 text-gray-700 hover:text-purple-500" />
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
+          <DropdownMenuContent align="end" className="bg-white shadow-lg border border-gray-200">
             <DropdownMenuItem 
               onClick={handleLogout}
-              className="cursor-pointer text-gray-700 hover:bg-purple-50 hover:text-purple-600"
+              className="cursor-pointer text-gray-700 hover:bg-gray-50"
             >
               <LogOut className="mr-2 h-4 w-4" />
               Logout
