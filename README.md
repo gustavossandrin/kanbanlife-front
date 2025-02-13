@@ -63,10 +63,3 @@ npm run dev
 - `src/services/` - Services and integrations
 - `src/stores/` - State management
 
-## Funcionalidades
-
-- Autenticação de usuários
-- Criação e gerenciamento de projetos
-- Quadro Kanban com drag and drop
-- Criação e organização de tarefas
-- Múltiplas colunas personalizáveis
